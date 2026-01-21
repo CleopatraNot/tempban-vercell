@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TempBan Administrator - Vercel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f1f1f1;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: rgba(30, 30, 46, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+            backdrop-filter: blur(10px);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4cc9f0;
+        }
+        
+        h1 {
+            color: #4cc9f0;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        h1 i {
+            color: #f72585;
+        }
+        
+        .tagline {
+            color: #b0b0d0;
+            font-size: 1.1rem;
+        }
+        
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(76, 201, 240, 0.1);
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4ade80;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .card {
+            background-color: #252540;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #4361ee;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            color: #4cc9f0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #b0b0d0;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #1a1a2e;
+            border: 2px solid #4361ee;
+            border-radius: 8px;
+            color: #f1f1f1;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #4cc9f0;
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.2);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group input:first-child {
+            flex: 0 0 120px;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #4361ee, #3a0ca3);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to right, #3a0ca3, #4361ee);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, #f72585, #b5179e);
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(to right, #b5179e, #f72585);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .output {
+            background-color: #1a1a2e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #f72585;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .output.active {
+            display: block;
+        }
+        
+        .log-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .log-item.success {
+            color: #4ade80;
+        }
+        
+        .log-item.error {
+            color: #f87171;
+        }
+        
+        .log-item.info {
+            color: #60a5fa;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-container.active {
+            display: block;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: #1a1a2e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4361ee, #4cc9f0);
+            width: 0%;
+            transition: width 0.5s;
+            border-radius: 10px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: rgba(30, 30, 46, 0.8);
+            display: none;
+        }
+        
+        .status-indicator.active {
+            display: flex;
+        }
+        
+        .warning {
+            background-color: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .warning i {
+            color: #f59e0b;
+            font-size: 1.5rem;
+        }
+        
+        .instructions {
+            background-color: rgba(30, 30, 46, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 5px solid #4ade80;
+        }
+        
+        .instructions h3 {
+            color: #4ade80;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #252540 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .summary-card.active {
+            display: grid;
+        }
+        
+        .stat-box {
+            background-color: rgba(30, 30, 46, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4cc9f0;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #b0b0d0;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            color: #b0b0d0;
+            font-size: 0.9rem;
+        }
+        
+        .vercel-badge {
+            margin-top: 10px;
+        }
+        
+        .vercel-badge img {
+            height: 32px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .input-group input:first-child {
+                flex: 1;
+            }
+            
+            .summary-card {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-user-slash"></i> TempBan Administrator</h1>
+            <p class="tagline">Tool untuk mengaktifkan interupsi registrasi WhatsApp ke nomor target</p>
+            <div class="api-status">
+                <div class="status-dot"></div>
+                <span id="apiStatus">Mengecek status API...</span>
+            </div>
+        </header>
+        
+        <div class="warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <p><strong>Peringatan:</strong> Fitur ini hanya boleh digunakan oleh administrator sistem untuk keperluan keamanan yang sah. Penggunaan yang tidak bertanggung jawab dapat melanggar ketentuan layanan.</p>
+                <p style="margin-top: 8px; font-size: 0.9rem;">Deployed on <strong>Vercel</strong> | API Status: <span id="deployStatus">Loading...</span></p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2><i class="fas fa-cogs"></i> Konfigurasi TempBan</h2>
+            
+            <div class="form-group">
+                <label for="adminKey">Kunci Administrator</label>
+                <input type="password" id="adminKey" placeholder="Masukkan kunci akses administrator">
+                <small style="color: #888; font-size: 0.9rem;">* Diatur melalui environment variable ADMIN_KEY</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="countryCode">Kode Negara (Contoh: 62 untuk Indonesia)</label>
+                <div class="input-group">
+                    <input type="text" id="countryCode" placeholder="62" value="62">
+                    <input type="text" id="phoneNumber" placeholder="81234567890 (tanpa + atau 0)">
+                </div>
+            </div>
+            
+            <button id="tempbanBtn" class="btn btn-danger">
+                <i class="fas fa-ban"></i> Aktifkan TempBan via API
+            </button>
+            
+            <div id="statusIndicator" class="status-indicator">
+                <div class="status-dot"></div>
+                <span id="statusText">Memproses permintaan...</span>
+            </div>
+            
+            <div id="progressContainer" class="progress-container">
+                <div class="progress-info">
+                    <span id="progressText">Mengirim kode registrasi: 0/50</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div id="summaryCard" class="summary-card">
+                <div class="stat-box">
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">Total Percobaan</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="statSuccess">0</div>
+                    <div class="stat-label">Berhasil</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="statFailed">0</div>
+                    <div class="stat-label">Gagal</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="statRate">0%</div>
+                    <div class="stat-label">Tingkat Keberhasilan</div>
+                </div>
+            </div>
+            
+            <div id="output" class="output"></div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Cara Deploy & Penggunaan</h3>
+            <ul>
+                <li><strong>Deploy ke Vercel:</strong> 
+                    <ol style="margin-left: 20px; margin-top: 5px;">
+                        <li>Push kode ini ke repository GitHub</li>
+                        <li>Import project di Vercel dari GitHub</li>
+                        <li>Atur environment variable ADMIN_KEY di Vercel dashboard</li>
+                        <li>Deploy dan dapatkan URL live</li>
+                    </ol>
+                </li>
+                <li><strong>Penggunaan:</strong> 
+                    <ol style="margin-left: 20px; margin-top: 5px;">
+                        <li>Masukkan kunci administrator yang diatur di Vercel</li>
+                        <li>Masukkan kode negara dan nomor telepon target</li>
+                        <li>Klik tombol "Aktifkan TempBan via API"</li>
+                        <li>Sistem akan mengirim 50 permintaan kode registrasi</li>
+                    </ol>
+                </li>
+                <li><strong>Environment Variables:</strong> ADMIN_KEY (kunci rahasia untuk akses API)</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p>© 2023 TempBan Administrator | Deployed on Vercel | Hanya untuk penggunaan yang sah</p>
+            <div class="vercel-badge">
+                <a href="https://vercel.com" target="_blank">
+                    <img src="https://vercel.com/button" alt="Deployed on Vercel">
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            "positionClass": "toast-top-right",
+            "timeOut": "3000",
+            "closeButton": true
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tempbanBtn = document.getElementById('tempbanBtn');
+            const adminKeyInput = document.getElementById('adminKey');
+            const countryCodeInput = document.getElementById('countryCode');
+            const phoneNumberInput = document.getElementById('phoneNumber');
+            const outputDiv = document.getElementById('output');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressPercent = document.getElementById('progressPercent');
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const apiStatusSpan = document.getElementById('apiStatus');
+            const deployStatusSpan = document.getElementById('deployStatus');
+            const summaryCard = document.getElementById('summaryCard');
+            const statTotal = document.getElementById('statTotal');
+            const statSuccess = document.getElementById('statSuccess');
+            const statFailed = document.getElementById('statFailed');
+            const statRate = document.getElementById('statRate');
+            
+            // Cek status API saat halaman dimuat
+            checkAPIStatus();
+            
+            // Event listener untuk tombol TempBan
+            tempbanBtn.addEventListener('click', async function() {
+                const adminKey = adminKeyInput.value.trim();
+                const countryCode = countryCodeInput.value.trim();
+                const phoneNumber = phoneNumberInput.value.trim().replace(/\D/g, '');
+                
+                // Validasi input
+                if (!adminKey) {
+                    showToast('error', 'Harap masukkan kunci administrator');
+                    return;
+                }
+                
+                if (!countryCode || !phoneNumber) {
+                    showToast('error', 'Harap masukkan kode negara dan nomor telepon yang valid');
+                    return;
+                }
+                
+                // Tampilkan indikator loading
+                statusIndicator.classList.add('active');
+                progressContainer.classList.add('active');
+                tempbanBtn.disabled = true;
+                statusText.textContent = 'Mengirim permintaan ke API...';
+                outputDiv.innerHTML = '';
+                outputDiv.classList.add('active');
+                summaryCard.classList.remove('active');
+                
+                showOutput('🚀 Memulai proses TempBan via API...', 'info');
+                
+                try {
+                    const response = await fetch('/api/tempban', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            adminKey: adminKey,
+                            countryCode: countryCode,
+                            phoneNumber: phoneNumber
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Terjadi kesalahan');
+                    }
+                    
+                    // Proses berhasil
+                    showOutput(`✅ Permintaan berhasil dikirim ke API`, 'success');
+                    showOutput(`📞 Target: +${data.target}`, 'info');
+                    
+                    // Simulasi progress dari hasil API
+                    processAPIResults(data);
+                    
+                } catch (error) {
+                    console.error('API Error:', error);
+                    showOutput(`❌ Error: ${error.message}`, 'error');
+                    showToast('error', `Gagal: ${error.message}`);
+                    
+                    // Reset UI
+                    resetUI();
+                }
+            });
+            
+            // Fungsi untuk memproses hasil dari API
+            function processAPIResults(data) {
+                const results = data.results;
+                const total = results.length;
+                let processed = 0;
+                
+                // Update summary
+                updateSummary(data.summary);
+                
+                // Proses setiap hasil
+                const processNext = () => {
+                    if (processed >= total) {
+                        // Selesai
+                        statusText.textContent = 'Proses selesai!';
+                        showOutput('\n========================================', 'info');
+                        showOutput(`🎉 PROSES TEMPBAN SELESAI!`, 'success');
+                        showOutput(`📊 Ringkasan: ${data.summary.successCount}/${total} berhasil`, 'info');
+                        showOutput('========================================', 'info');
+                        
+                        // Tampilkan summary card
+                        summaryCard.classList.add('active');
+                        
+                        // Reset tombol setelah 3 detik
+                        setTimeout(() => {
+                            statusIndicator.classList.remove('active');
+                            tempbanBtn.disabled = false;
+                        }, 3000);
+                        
+                        showToast('success', 'Proses TempBan selesai!');
+                        return;
+                    }
+                    
+                    const result = results[processed];
+                    
+                    // Update progress
+                    const progress = ((processed + 1) / total) * 100;
+                    progressFill.style.width = `${progress}%`;
+                    progressText.textContent = `Mengirim kode registrasi: ${processed + 1}/${total}`;
+                    progressPercent.textContent = `${Math.round(progress)}%`;
+                    statusText.textContent = `Memproses ${processed + 1} dari ${total}...`;
+                    
+                    // Tampilkan log
+                    if (result.status === 'success') {
+                        showOutput(`✅ Percobaan ${result.attempt}: ${result.message}`, 'success');
+                    } else {
+                        showOutput(`❌ Percobaan ${result.attempt}: ${result.message}`, 'error');
+                    }
+                    
+                    processed++;
+                    
+                    // Delay untuk efek visual
+                    setTimeout(processNext, 100);
+                };
+                
+                // Mulai proses
+                processNext();
+            }
+            
+            // Fungsi untuk update summary card
+            function updateSummary(summary) {
+                statTotal.textContent = summary.totalAttempts;
+                statSuccess.textContent = summary.successCount;
+                statFailed.textContent = summary.failureCount;
+                statRate.textContent = `${summary.successRate}%`;
+            }
+            
+            // Fungsi untuk menampilkan output
+            function showOutput(message, type = "info") {
+                const logItem = document.createElement('div');
+                logItem.classList.add('log-item', type);
+                logItem.textContent = message;
+                
+                outputDiv.appendChild(logItem);
+                outputDiv.scrollTop = outputDiv.scrollHeight;
+            }
+            
+            // Fungsi untuk menampilkan toast notification
+            function showToast(type, message) {
+                toastr[type](message);
+            }
+            
+            // Fungsi untuk reset UI
+            function resetUI() {
+                progressFill.style.width = '0%';
+                progressText.textContent = 'Mengirim kode registrasi: 0/50';
+                progressPercent.textContent = '0%';
+                statusIndicator.classList.remove('active');
+                progressContainer.classList.remove('active');
+                tempbanBtn.disabled = false;
+                summaryCard.classList.remove('active');
+            }
+            
+            // Fungsi untuk cek status API
+            async function checkAPIStatus() {
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+                    
+                    apiStatusSpan.textContent = `API Online (v${data.version})`;
+                    deployStatusSpan.textContent = 'Live';
+                    deployStatusSpan.style.color = '#4ade80';
+                    
+                    showToast('success', 'API terhubung dengan sukses');
+                } catch (error) {
+                    apiStatusSpan.textContent = 'API Offline';
+                    apiStatusSpan.style.color = '#f87171';
+                    deployStatusSpan.textContent = 'API Error';
+                    deployStatusSpan.style.color = '#f87171';
+                    
+                    showToast('warning', 'API tidak terhubung, beberapa fitur mungkin terbatas');
+                }
+            }
+            
+            // Event listener untuk tombol ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    resetUI();
+                    showToast('info', 'Proses dibatalkan');
+                }
+            });
+            
+            // Pre-fill contoh data untuk testing
+            countryCodeInput.value = "62";
+            phoneNumberInput.value = "81234567890";
+            
+            // Info penggunaan
+            showOutput('💡 Tips: Tekan ESC untuk membatalkan proses', 'info');
+            showOutput('🌐 Status API akan ditampilkan di atas', 'info');
+        });
+    </script>
+</body>
+</html>
