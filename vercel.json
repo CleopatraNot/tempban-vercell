@@ -19,8 +19,5 @@
       "src": "/(.*)",
       "dest": "/api/tempban"
     }
-  ],
-  "env": {
-    "ADMIN_KEY": "@tempban-admin-key"
-  }
+  ]
 }
