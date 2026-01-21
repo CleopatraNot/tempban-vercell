@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/tempban.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/api/tempban"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/tempban"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/tempban"
+    }
+  ],
+  "env": {
+    "ADMIN_KEY": "@tempban-admin-key"
+  }
+}
